@@ -2,15 +2,19 @@
 #define PLAYER_HPP
 
 #include <memory>
+#include "collider.hpp"
 #include "spatialnode.hpp"
 #include "matrix/matrix.hpp"
+
+using namespace gnid;
 
 namespace gnid
 {
     class Camera;
+    class Event;
 }
 
-class Player : public gnid::SpatialNode
+class Player : public SpatialNode
 {
 public:
     const float MOVE_SPEED = 4;
@@ -21,18 +25,20 @@ public:
 
     float &moveX() { return moveX_; }
     float &moveZ() { return moveZ_; }
+    float &moveY() { return moveY_; }
 
     void update(float dt) override;
     void init();
+
 private:
     float lookX_ = 0.0f;
     float lookY_ = 0.0f;
     
     float moveX_ = 0.0f;
     float moveZ_ = 0.0f;
+    float moveY_ = 0.0f;
 
-    tmat::Vector3f position;
-
+    std::shared_ptr<gnid::SpatialNode> head;
     std::shared_ptr<gnid::Camera> camera;
 };
 

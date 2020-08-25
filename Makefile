@@ -6,7 +6,7 @@ BINDIR = bin
 
 UNAME = $(shell uname)
 
-LIBS = -lgnid
+LIBS = -lgnid -lglfw
 
 CC = g++
 CFLAGS = -g -Wall -c -I$(DEPSDIR) -I$(DEPSDIR)/gnidEngine/include\
