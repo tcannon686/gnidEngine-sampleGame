@@ -1,4 +1,5 @@
-#include "player.hpp"
+#include "game/player.hpp"
+
 #include <gnid/box.hpp>
 #include <gnid/collider.hpp>
 #include <gnid/camera.hpp>
@@ -52,7 +53,7 @@ void Player::update(float dt)
         Vector3f dir = body->right() * moveX()
                      + body->forward() * moveZ()
                      + body->up() * moveY();
-        if(dir.magnitude() > .2)
+        if(dir.magnitude() > 0.2f)
         {
             dir.normalize();
             dir *= dt * MOVE_SPEED;

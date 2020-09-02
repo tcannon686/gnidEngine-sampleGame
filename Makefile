@@ -1,28 +1,21 @@
+# Makefile wrapper
 
-INCLUDEDIR = include
-SRCDIR = src
-DEPSDIR = deps
-BINDIR = bin
+BUILD_DIR = build
+CMAKE 	  = cmake
+CD        = cd
+RMRF      = rm -rf
+MKDIR     = mkdir -p
 
-UNAME = $(shell uname)
+all: ./build/Makefile
+	$(CD)    $(BUILD_DIR) && $(CMAKE) --build .
 
-LIBS = -lgnid -lglfw -ldl
+install: ./build/Makefile
+	$(CD)    $(BUILD_DIR) && $(CMAKE) --install .
 
-CC = g++
-CFLAGS = -g -Wall -c -I$(INCLUDEDIR)
+./build/Makefile: ./CMakeLists.txt
+	$(MKDIR) $(BUILD_DIR)
+	$(CD)    $(BUILD_DIR) && $(CMAKE) ..
 
-EXEURCES = $(shell find $(SRCDIR) -name "*.cpp")
-HEADERS = $(shell find $(INCLUDEDIR) -name "*.hpp")
-OBJECTS = $(shell find $(SRCDIR) -name "*.cpp" | sed -e 's|.cpp$$|.o|' | sed -e 's|^$(SRCDIR)|$(BINDIR)|')
-
-EXE = game
-
-$(EXE) : $(OBJECTS)
-	$(CC) -L./ $(OBJECTS) $(LIBS) -o $(EXE)
-
-$(BINDIR)/%.o : $(SRCDIR)/%.cpp $(HEADERS)
-	$(CC) $(CFLAGS) $< -o $@
-
-clean :
-	rm -f $(OBJECTS) $(EXE)
+distclean:
+	$(RMRF) $(BUILD_DIR)
 

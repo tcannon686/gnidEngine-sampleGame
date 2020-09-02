@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/game.dir/src/game/game.cpp.o CMakeFiles/game.dir/src/game/player.cpp.o -o game  -lglfw -lgnid -ldl 

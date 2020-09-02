@@ -10,7 +10,7 @@
 #include <gnid/lightnode.hpp>
 #include <gnid/collider.hpp>
 
-#include "player.hpp"
+#include "game/player.hpp"
 
 #include <memory>
 #include <iostream>
@@ -168,8 +168,8 @@ void Game::update(float dt)
             (glfwGetKey(window(), GLFW_KEY_W) == GLFW_PRESS ? -1.0f : 0.0f)
             + (glfwGetKey(window(), GLFW_KEY_S) == GLFW_PRESS ? 1.0f : 0.0f);
         player->moveY() =
-            (glfwGetKey(window(), GLFW_KEY_E) == GLFW_PRESS ? -1.0f : 0.0f)
-            + (glfwGetKey(window(), GLFW_KEY_Q) == GLFW_PRESS ? 1.0f : 0.0f);
+            (glfwGetKey(window(), GLFW_KEY_Q) == GLFW_PRESS ? -1.0f : 0.0f)
+            + (glfwGetKey(window(), GLFW_KEY_E) == GLFW_PRESS ? 1.0f : 0.0f);
     }
 
     lastMouseX = mouseX;
