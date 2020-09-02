@@ -1,10 +1,10 @@
-#include "box.hpp"
-#include "collider.hpp"
-#include "camera.hpp"
-#include "lightnode.hpp"
 #include "player.hpp"
-#include "event.hpp"
-#include "collisionevent.hpp"
+#include <gnid/box.hpp>
+#include <gnid/collider.hpp>
+#include <gnid/camera.hpp>
+#include <gnid/lightnode.hpp>
+#include <gnid/event.hpp>
+#include <gnid/collisionevent.hpp>
 
 using namespace std;
 using namespace gnid;
@@ -16,6 +16,7 @@ Player::Player()
 
 void Player::init()
 {
+    body = make_shared<SpatialNode>();
     head = make_shared<SpatialNode>();
     camera = make_shared<Camera>(
                 (float) M_PI / 3.0f,
@@ -23,7 +24,8 @@ void Player::init()
                 0.1f,
                 100.0f);
     head->add(camera);
-    add(head);
+    body->add(head);
+    add(body);
     
     shared_ptr<Box> box = make_shared<Box>();
     box->add({-1, -1, -1});
@@ -47,19 +49,19 @@ void Player::update(float dt)
     /* Update movement. */
     if(moveX() != 0 || moveZ() != 0 || moveY() != 0)
     {
-        Vector3f dir = Vector3f::right * moveX()
-                     + Vector3f::forward * moveZ()
-                     + Vector3f::up * moveY();
+        Vector3f dir = body->right() * moveX()
+                     + body->forward() * moveZ()
+                     + body->up() * moveY();
         if(dir.magnitude() > .2)
         {
             dir.normalize();
             dir *= dt * MOVE_SPEED;
-            transform(getTranslateMatrix(dir));
+            transformWorld(getTranslateMatrix(dir));
         }
     }
 
     /* Update position. */
-    transform(rotateY);
-    head->transform(rotateX);
+    head->transformLocal(rotateX);
+    body->transformLocal(rotateY);
 }
 

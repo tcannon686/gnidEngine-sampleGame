@@ -1,24 +1,23 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include "gnid.hpp"
-#include "gamebase.hpp"
-#include "matrix/matrix.hpp"
-#include "node.hpp"
-#include "renderernode.hpp"
-#include "scene.hpp"
-#include "phongshader.hpp"
-#include "spatialnode.hpp"
-#include "obj_parser.hpp"
-#include "lightnode.hpp"
-#include "collider.hpp"
+#include <gnid/gnid.hpp>
+#include <gnid/gamebase.hpp>
+#include <gnid/matrix/matrix.hpp>
+#include <gnid/node.hpp>
+#include <gnid/renderernode.hpp>
+#include <gnid/scene.hpp>
+#include <gnid/phongshader.hpp>
+#include <gnid/spatialnode.hpp>
+#include <gnid/obj_parser.hpp>
+#include <gnid/lightnode.hpp>
+#include <gnid/collider.hpp>
 
 #include "player.hpp"
 
 #include <memory>
 #include <iostream>
 #include <fstream>
+#include <random>
 
+using namespace tmat;
 using namespace gnid;
 using namespace std;
 
@@ -115,14 +114,25 @@ bool Game::postLoadContent()
     node1->add(obj_node->clone());
     scene->root->add(node1);
 
-    /* Second box node. */
-    node1 = make_shared<SpatialNode>();
+    /* Spawn random boxes. */
+    default_random_engine gen;
+    uniform_real_distribution<float> dist(-10.0f, 10.0f);
 
-    node1->add(make_shared<Collider>(box));
+    for(int i = 0; i < 10; i ++)
+    {
 
-    node1->add(obj_node->clone());
-    node1->transform(getTranslateMatrix(Vector3f::right * 1 + Vector3f::up * 2.1 + Vector3f::forward * 1.25));
-    scene->root->add(node1);
+        node1 = make_shared<SpatialNode>();
+        node1->add(make_shared<Collider>(box));
+        node1->add(obj_node->clone());
+        node1->transformWorld(getRotateMatrix(dist(gen), Vector3f::right));
+        node1->transformWorld(getRotateMatrix(dist(gen), Vector3f::up));
+        node1->transformWorld(getRotateMatrix(dist(gen), Vector3f::forward));
+        node1->transformWorld(getTranslateMatrix(
+                    Vector3f::right * dist(gen)
+                  + Vector3f::up * dist(gen)
+                  + Vector3f::forward * dist(gen)));
+        scene->root->add(node1);
+    }
 
     auto light = make_shared<LightNode>();
     light->distance() = 1.0f;
@@ -130,12 +140,12 @@ bool Game::postLoadContent()
     /* Add the player. */
     player = make_shared<Player>();
     player->init();
-    player->transform(getTranslateMatrix(-Vector3f::forward * 10));
+    player->transformWorld(getTranslateMatrix(-Vector3f::forward * 10));
 
     scene->root->add(player);
 
     auto lightNode = make_shared<SpatialNode>();
-    lightNode->transform(getTranslateMatrix(Vector3f { -3, 5, -8 }));
+    lightNode->transformWorld(getTranslateMatrix(Vector3f { -3, 5, -8 }));
     lightNode->add(light);
 
     scene->root->add(lightNode);
@@ -161,14 +171,6 @@ void Game::update(float dt)
             (glfwGetKey(window(), GLFW_KEY_E) == GLFW_PRESS ? -1.0f : 0.0f)
             + (glfwGetKey(window(), GLFW_KEY_Q) == GLFW_PRESS ? 1.0f : 0.0f);
     }
-
-    node1->transform(getRotateMatrix(dt * 0.1f, Vector3f::right));
-    node1->transform(getRotateMatrix(dt * 0.0123f, Vector3f::up));
-    node1->transform(
-            getTranslateMatrix(
-                transformDirection(
-                node1->getWorldMatrix().inverse(),
-                    -Vector3f::up * dt * 0.1f)));
 
     lastMouseX = mouseX;
     lastMouseY = mouseY;

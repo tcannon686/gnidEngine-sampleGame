@@ -2,9 +2,9 @@
 #define PLAYER_HPP
 
 #include <memory>
-#include "collider.hpp"
-#include "spatialnode.hpp"
-#include "matrix/matrix.hpp"
+#include <gnid/collider.hpp>
+#include <gnid/spatialnode.hpp>
+#include <gnid/matrix/matrix.hpp>
 
 using namespace gnid;
 
@@ -38,6 +38,7 @@ private:
     float moveZ_ = 0.0f;
     float moveY_ = 0.0f;
 
+    std::shared_ptr<gnid::SpatialNode> body;
     std::shared_ptr<gnid::SpatialNode> head;
     std::shared_ptr<gnid::Camera> camera;
 };
