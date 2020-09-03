@@ -1,3 +1,0 @@
-/home/tcannon/Projects/gnidGame/build/CMakeFiles/rebuild_cache.dir
-/home/tcannon/Projects/gnidGame/build/CMakeFiles/edit_cache.dir
-/home/tcannon/Projects/gnidGame/build/CMakeFiles/game.dir

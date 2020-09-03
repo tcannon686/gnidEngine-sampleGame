@@ -24,7 +24,7 @@ using namespace std;
 class Game : public GameBase {
 public:
 
-    Game()
+    Game() : GameBase("Gnid game", 640, 480)
     {
     }
     
@@ -83,7 +83,7 @@ bool Game::init()
     scene = make_shared<Scene>();
     scene->init();
 
-    Gnid::setCursorEnabled(false);
+    setCursorEnabled(false);
 
     return true;
 }
@@ -199,5 +199,5 @@ void Game::mouseMoveCallback(
 int main(int argc, char *argv[])
 {
     Game game;
-    Gnid::start(game);
+    game.start();
 }

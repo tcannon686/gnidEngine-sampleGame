@@ -14,7 +14,7 @@ install: ./build/Makefile
 
 ./build/Makefile: ./CMakeLists.txt
 	$(MKDIR) $(BUILD_DIR)
-	$(CD)    $(BUILD_DIR) && $(CMAKE) ..
+	$(CD)    $(BUILD_DIR) && $(CMAKE) -DCMAKE_BUILD_TYPE=Debug ..
 
 distclean:
 	$(RMRF) $(BUILD_DIR)
