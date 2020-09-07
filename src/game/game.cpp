@@ -7,6 +7,7 @@
 #include <gnid/phongshader.hpp>
 #include <gnid/spatialnode.hpp>
 #include <gnid/obj_parser.hpp>
+#include <gnid/tmdparser.hpp>
 #include <gnid/lightnode.hpp>
 #include <gnid/collider.hpp>
 
@@ -63,6 +64,8 @@ private:
     shared_ptr<SpatialNode> node1;
     shared_ptr<SpatialNode> node2;
     shared_ptr<Node> obj_node;
+    shared_ptr<SpatialNode> trigger;
+    std::shared_ptr<gnid::Observer<Collision>> collisionObserver;
 
     shared_ptr<Player> player;
 
@@ -114,6 +117,23 @@ bool Game::postLoadContent()
     node1->add(obj_node->clone());
     scene->root->add(node1);
 
+    node1->transformLocal(getScaleMatrix(Vector3f { 20, 0.5, 20 }));
+    node1->transformLocal(getTranslateMatrix(Vector3f { 0, -3, 0 }));
+
+    node1 = make_shared<SpatialNode>();
+    shared_ptr<Collider> colliderNode = make_shared<Collider>(box);
+    colliderNode->isTrigger() = true;
+    collisionObserver = make_shared<Observer<Collision>>(
+                [](Collision collision)
+                {
+                    cout << "Collision entered!" << endl;
+                });
+    colliderNode->collisionEntered()->subscribe(collisionObserver);
+    node1->add(colliderNode);
+    node1->add(obj_node->clone());
+
+    scene->root->add(node1);
+
     /* Spawn random boxes. */
     default_random_engine gen;
     uniform_real_distribution<float> dist(-10.0f, 10.0f);
@@ -121,7 +141,7 @@ bool Game::postLoadContent()
     for(int i = 0; i < 10; i ++)
     {
 
-        node1 = make_shared<SpatialNode>();
+        node1 = make_shared<Rigidbody>();
         node1->add(make_shared<Collider>(box));
         node1->add(obj_node->clone());
         node1->transformWorld(getRotateMatrix(dist(gen), Vector3f::right));

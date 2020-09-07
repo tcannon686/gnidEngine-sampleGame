@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <gnid/collider.hpp>
-#include <gnid/spatialnode.hpp>
+#include <gnid/rigidbody.hpp>
 #include <gnid/matrix/matrix.hpp>
 
 using namespace gnid;
@@ -14,7 +14,7 @@ namespace gnid
     class Event;
 }
 
-class Player : public SpatialNode
+class Player : public Rigidbody
 {
 public:
     const float MOVE_SPEED = 4;

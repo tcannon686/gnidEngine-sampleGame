@@ -6,12 +6,14 @@
 #include <gnid/lightnode.hpp>
 #include <gnid/event.hpp>
 #include <gnid/collisionevent.hpp>
+#include <gnid/sphere.hpp>
 
 using namespace std;
 using namespace gnid;
 using namespace tmat;
 
 Player::Player()
+    : Rigidbody::Rigidbody(1.0f)
 {
 }
 
@@ -20,7 +22,7 @@ void Player::init()
     body = make_shared<SpatialNode>();
     head = make_shared<SpatialNode>();
     camera = make_shared<Camera>(
-                (float) M_PI / 3.0f,
+                (float) M_PI / 2.0f,
                 640.0f / 480.0f,
                 0.1f,
                 100.0f);
@@ -32,7 +34,7 @@ void Player::init()
     box->add({-1, -1, -1});
     box->add({1, 1, 1});
 
-    shared_ptr<Collider> collider = make_shared<Collider>(box);
+    shared_ptr<Collider> collider = make_shared<Collider>(make_shared<Sphere>());
     add(collider);
 }
 
