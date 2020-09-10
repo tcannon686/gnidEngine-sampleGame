@@ -5,6 +5,8 @@
 #include <gnid/collider.hpp>
 #include <gnid/rigidbody.hpp>
 #include <gnid/matrix/matrix.hpp>
+#include <gnid/observer.hpp>
+#include <gnid/collision.hpp>
 
 using namespace gnid;
 
@@ -27,6 +29,10 @@ public:
     float &moveZ() { return moveZ_; }
     float &moveY() { return moveY_; }
 
+    bool &jump() { return jump_; }
+
+    bool isOnGround() const;
+
     void update(float dt) override;
     void init();
 
@@ -38,9 +44,20 @@ private:
     float moveZ_ = 0.0f;
     float moveY_ = 0.0f;
 
+    const float jumpForce = 4.0;
+
+    bool jump_ = false;
+
     std::shared_ptr<gnid::SpatialNode> body;
     std::shared_ptr<gnid::SpatialNode> head;
     std::shared_ptr<gnid::Camera> camera;
+
+    std::shared_ptr<gnid::Collider> collider_;
+
+    std::shared_ptr<gnid::Observer<Collision>> touchGroundObserver;
+    std::shared_ptr<gnid::Observer<Collision>> leftGroundObserver;
+
+    std::weak_ptr<gnid::Collider> ground_;
 };
 
 #endif /* ifndef PLAYER_HPP */
