@@ -44,7 +44,7 @@ private:
     float moveZ_ = 0.0f;
     float moveY_ = 0.0f;
 
-    const float jumpForce = 4.0;
+    const float jumpForce = 8.0;
 
     bool jump_ = false;
 

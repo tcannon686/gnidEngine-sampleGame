@@ -30,7 +30,7 @@ void Player::init()
     head = make_shared<SpatialNode>();
     camera = make_shared<Camera>(
                 (float) M_PI / 2.0f,
-                640.0f / 480.0f,
+                800.0f / 600.0f,
                 0.1f,
                 100.0f);
     head->add(camera);
@@ -50,38 +50,25 @@ void Player::init()
     touchGroundObserver = make_shared<Observer<Collision>>(
             [this](Collision collision)
             {
-                std::cout << collision.overlap().normalized().dot(Vector3f::up) << std::endl;
-                if(collision.colliders()[0] == collider_)
+                if(collision.overlap().normalized().dot(Vector3f::up)
+                        < -0.5f && !collision.colliders()[1]->isTrigger())
                 {
-                    if(collision.overlap().normalized().dot(Vector3f::up)
-                            > 0.25f && !collision.colliders()[1]->isTrigger())
-                    {
-                        ground_ = collision.colliders()[1];
-                    }
-                }
-                else
-                {
-                    if(collision.overlap().normalized().dot(Vector3f::up)
-                            < -0.25f && !collision.colliders()[0]->isTrigger())
-                    {
-                        ground_ = collision.colliders()[0];
-                    }
+                    ground_ = collision.colliders()[1];
                 }
             });
 
     leftGroundObserver = make_shared<Observer<Collision>>(
             [this](Collision collision)
             {
-                auto groundShared = ground_.lock();
-                if(groundShared
-                        && (collision.colliders()[0] == groundShared
-                        || collision.colliders()[1] == groundShared))
+                shared_ptr groundShared = ground_.lock();
+
+                if(collision.colliders()[1] == groundShared)
                 {
                     ground_.reset();
                 }
             });
 
-    collider_->collisionEntered()->subscribe(touchGroundObserver);
+    collider_->collisionStayed()->subscribe(touchGroundObserver);
     collider_->collisionExited()->subscribe(leftGroundObserver);
 }
 
@@ -111,7 +98,6 @@ void Player::update(float dt)
 
     if(jump_ && isOnGround())
     {
-        cout << "jumped!" << endl;
         addImpulse(Vector3f::up * jumpForce);
     }
 

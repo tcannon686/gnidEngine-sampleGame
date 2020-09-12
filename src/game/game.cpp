@@ -24,7 +24,7 @@ using namespace std;
 class Game : public GameBase {
 public:
 
-    Game() : GameBase("Gnid game", 640, 480)
+    Game() : GameBase("Gnid game", 800, 600)
     {
     }
     
@@ -154,20 +154,19 @@ bool Game::postLoadContent()
 
     /* Spawn random boxes. */
     default_random_engine gen;
-    uniform_real_distribution<float> dist(-100.0f, 100.0f);
+    uniform_real_distribution<float> dist(-50.0f, 50.0f);
+    uniform_real_distribution<float> distY(-10.0f, 50.0f);
 
-    for(int i = 0; i < 100; i ++)
+    for(int i = 0; i < 1000; i ++)
     {
 
-        node1 = make_shared<Rigidbody>();
+        node1 = make_shared<SpatialNode>();
         node1->add(make_shared<Collider>(box));
-        node1->add(sphereMonsterNode->clone());
-        node1->transformWorld(getRotateMatrix(dist(gen), Vector3f::right));
+        node1->add(cubeNode->clone());
         node1->transformWorld(getRotateMatrix(dist(gen), Vector3f::up));
-        node1->transformWorld(getRotateMatrix(dist(gen), Vector3f::forward));
         node1->transformWorld(getTranslateMatrix(
                     Vector3f::right * dist(gen)
-                  + Vector3f::up * dist(gen)
+                  + Vector3f::up * distY(gen)
                   + Vector3f::forward * dist(gen)));
         scene->root->add(node1);
     }
@@ -187,8 +186,6 @@ bool Game::postLoadContent()
     lightNode->add(light);
 
     scene->root->add(lightNode);
-
-    cout << "player: " << player << endl;
     return true;
 }
 
