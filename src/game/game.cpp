@@ -1,5 +1,6 @@
+#include "game/game.hpp"
+
 #include <gnid/gnid.hpp>
-#include <gnid/gamebase.hpp>
 #include <gnid/matrix/matrix.hpp>
 #include <gnid/node.hpp>
 #include <gnid/renderernode.hpp>
@@ -21,73 +22,16 @@ using namespace tmat;
 using namespace gnid;
 using namespace std;
 
-class Game : public GameBase {
-public:
-
-    Game() : GameBase("Gnid game", 800, 600)
-    {
-    }
-    
-    ~Game()
-    {
-    }
-
-    const shared_ptr<Scene> &currentScene() const override;
-
-    bool loadContent() override;
-    bool postLoadContent() override;
-    bool init() override;
-    void update(float dt) override;
-
-    /*void keyCallback(
-            int key,
-            int scancode,
-            int action,
-            int mods) override;
-
-    void charCallback(
-            unsigned int character) override; */
-
-    void mouseMoveCallback(
-            double x,
-            double y) override;
-
-    /*void mouseCallback(
-            int button,
-            int action,
-            int mods) override; */
-
-private:
-    shared_ptr<Node> loadTmdModel(std::string path) const;
-
-    shared_ptr<Scene> scene;
-    shared_ptr<PhongShader> phongShader;
-    shared_ptr<SpatialNode> node1;
-    shared_ptr<SpatialNode> node2;
-    shared_ptr<SpatialNode> trigger;
-    std::shared_ptr<gnid::Observer<Collision>> collisionObserver;
-    std::map<std::string, std::shared_ptr<gnid::PhongMaterial>>
-        materialMappings;
-
-    /* Models */
-    shared_ptr<Node> cubeNode;
-    shared_ptr<Node> sphereMonsterNode;
-
-    shared_ptr<Player> player;
-
-    double mouseX;
-    double mouseY;
-
-    double lastMouseX;
-    double lastMouseY;
-
-    bool hasInput;
-};
+Game::Game()
+    : GameBase("Sample Game", 800, 600)
+{
+}
 
 std::shared_ptr<Node> Game::loadTmdModel(std::string path) const
 {
-    ifstream s;
-    s.open(path);
+    ifstream s(path);
+
+    /* Load a TMD model from the ifstream. */
     TmdParser<istream&> tmd(s);
     tmd.parse();
     assert(phongShader);
@@ -97,12 +41,15 @@ std::shared_ptr<Node> Game::loadTmdModel(std::string path) const
 
 bool Game::init()
 {
+    /* Create a phong shader.  */
     phongShader = make_shared<PhongShader>();
     phongShader->init();
 
+    /* Create the scene. */
     scene = make_shared<Scene>();
     scene->init();
 
+    /* Hide the cursor. */
     setCursorEnabled(false);
 
     return true;
@@ -110,47 +57,45 @@ bool Game::init()
 
 bool Game::loadContent()
 {
+    /* Specify the names of the materials in the models being imported. */
     materialMappings = {
-        { "Material", make_shared<PhongMaterial>(phongShader, Vector3f { 1, 1, 1 }) },
-        { "sphereMonster1", make_shared<PhongMaterial>(phongShader, Vector3f { 1, 0, 0 }) }
+        {
+            "Material",
+            make_shared<PhongMaterial>(phongShader, Vector3f { 1, 1, 1 })
+        }
     };
 
+    /* Load the cube model. */
     cubeNode = loadTmdModel("models/Cube.tmd");
-    sphereMonsterNode = loadTmdModel("models/SphereMonster.tmd");
 
     return true;
 }
 
 bool Game::postLoadContent()
 {
-    /* First box node. */
-    node1 = make_shared<SpatialNode>();
-
-    shared_ptr<Box> box = make_shared<Box>();
+    /* Create a unit box. */
+    auto box = make_shared<Box>();
     box->add({-1, -1, -1});
     box->add({1, 1, 1});
 
-    node1->add(make_shared<Collider>(box));
+    /* Create the floor node. */
+    const auto floorNode = make_shared<SpatialNode>();
 
-    node1->add(cubeNode->clone());
-    scene->root->add(node1);
+    /* Add a collider to the floor node. */
+    floorNode->add(make_shared<Collider>(box));
+    
+    /*
+     * Add the cube mesh to the floor node. We clone it because otherwise the
+     * node would be removed from its previous parent.
+     */
+    floorNode->add(cubeNode->clone());
 
-    node1->transformLocal(getScaleMatrix(Vector3f { 200, 0.5, 200 }));
-    node1->transformLocal(getTranslateMatrix(Vector3f { 0, -10, 0 }));
+    /* Add the floor node to the scene. */
+    scene->root->add(floorNode);
 
-    node1 = make_shared<SpatialNode>();
-    shared_ptr<Collider> colliderNode = make_shared<Collider>(box);
-    colliderNode->isTrigger() = true;
-    collisionObserver = make_shared<Observer<Collision>>(
-                [](Collision collision)
-                {
-                    cout << "Collision entered!" << endl;
-                });
-    colliderNode->collisionEntered()->subscribe(collisionObserver);
-    node1->add(colliderNode);
-    node1->add(cubeNode->clone());
-
-    scene->root->add(node1);
+    /* Set its scale and place it 10 meters below us. */
+    floorNode->transformLocal(getScaleMatrix(Vector3f { 200, 0.5, 200 }));
+    floorNode->transformLocal(getTranslateMatrix(Vector3f { 0, -10, 0 }));
 
     /* Spawn random boxes. */
     default_random_engine gen;
@@ -159,33 +104,46 @@ bool Game::postLoadContent()
 
     for(int i = 0; i < 1000; i ++)
     {
-
-        node1 = make_shared<SpatialNode>();
-        node1->add(make_shared<Collider>(box));
-        node1->add(cubeNode->clone());
-        node1->transformWorld(getRotateMatrix(dist(gen), Vector3f::up));
-        node1->transformWorld(getTranslateMatrix(
+        /* Create the box node. */
+        const auto node = make_shared<SpatialNode>();
+        /* Add a collider to it. */
+        node->add(make_shared<Collider>(box));
+        /* Add the mesh. */
+        node->add(cubeNode->clone());
+        /* Rotate it a random amount around the Y axis. */
+        node->transformWorld(getRotateMatrix(dist(gen), Vector3f::up));
+        /* Translate it to a random position. */
+        node->transformWorld(getTranslateMatrix(
                     Vector3f::right * dist(gen)
                   + Vector3f::up * distY(gen)
                   + Vector3f::forward * dist(gen)));
-        scene->root->add(node1);
+        /* Add it to the scene. */
+        scene->root->add(node);
     }
 
-    auto light = make_shared<LightNode>();
-    light->distance() = 1.0f;
+    /* Add a light to the scene. */
+    /* Create the light and set its properties. */
+    const auto lightNode = make_shared<LightNode>();
+    lightNode->distance() = 1.0f;
+
+    /* Create a spatial node to hold the light. */
+    const auto lightNodeSpatial = make_shared<SpatialNode>();
+    /* Move it to the specified position. */
+    lightNodeSpatial->transformWorld(
+            getTranslateMatrix(Vector3f { -3, 5, -8 }));
+    /* Attach the light to it. */
+    lightNodeSpatial->add(lightNode);
+
+    /* Add the light to the scene. */
+    scene->root->add(lightNodeSpatial);
 
     /* Add the player. */
     player = make_shared<Player>();
+    /* Initialize its connections. */
     player->init();
-    player->transformWorld(getTranslateMatrix(-Vector3f::forward * 10));
-
+    /* Add it to the scene. */
     scene->root->add(player);
 
-    auto lightNode = make_shared<SpatialNode>();
-    lightNode->transformWorld(getTranslateMatrix(Vector3f { -3, 5, -8 }));
-    lightNode->add(light);
-
-    scene->root->add(lightNode);
     return true;
 }
 
@@ -197,6 +155,7 @@ void Game::update(float dt)
         player->lookY() = -dt * (mouseY - lastMouseY) * 0.2;
     }
 
+    /* Move the player depending on the key inputs. */
     player->moveX() =
         (glfwGetKey(window(), GLFW_KEY_A) == GLFW_PRESS ? -1.0f : 0.0f)
         + (glfwGetKey(window(), GLFW_KEY_D) == GLFW_PRESS ? 1.0f : 0.0f);
@@ -215,6 +174,7 @@ void Game::update(float dt)
 
 const shared_ptr<Scene> &Game::currentScene() const
 {
+    /* Let the game know which scene to render/update. */
     return scene;
 }
 
@@ -233,8 +193,10 @@ void Game::mouseMoveCallback(
     }
 }
 
+/* The entry point to the application. */
 int main(int argc, char *argv[])
 {
     Game game;
     game.start();
 }
+

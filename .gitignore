@@ -1,3 +1,6 @@
-*.so
-*.o
+*~
+.*.swp
+.*.swo
+tags
+docs
 build
