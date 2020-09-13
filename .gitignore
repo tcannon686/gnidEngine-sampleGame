@@ -2,5 +2,5 @@
 .*.swp
 .*.swo
 tags
-docs
-build
+/docs
+/build
