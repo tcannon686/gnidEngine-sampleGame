@@ -25,12 +25,12 @@ public:
     /**
      * \brief Controls how fast the player moves
      */
-    const float MOVE_SPEED = 4;
+    const float MOVE_SPEED = 6.0;
 
     /**
      * \brief Controls how much force is applied when the player jumps
      */
-    const float JUMP_FORCE = 8.0;
+    const float JUMP_FORCE = 4.0;
 
     Player();
     /**

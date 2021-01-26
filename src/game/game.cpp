@@ -8,7 +8,7 @@
 #include <gnid/phongshader.hpp>
 #include <gnid/spatialnode.hpp>
 #include <gnid/tmdparser.hpp>
-#include <gnid/lightnode.hpp>
+#include <gnid/directionallight.hpp>
 #include <gnid/collider.hpp>
 
 #include "game/player.hpp"
@@ -61,7 +61,11 @@ bool Game::loadContent()
     materialMappings = {
         {
             "Material",
-            make_shared<PhongMaterial>(phongShader, Vector3f { 1, 1, 1 })
+            make_shared<PhongMaterial>(
+                    phongShader,
+                    Vector3f { 1, 1, 1 },
+                    Vector3f { 0.1, 0.1, 0.1 },
+                    50.0f)
         }
     };
 
@@ -123,8 +127,8 @@ bool Game::postLoadContent()
 
     /* Add a light to the scene. */
     /* Create the light and set its properties. */
-    const auto lightNode = make_shared<LightNode>();
-    lightNode->distance() = 1.0f;
+    const auto lightNode = make_shared<DirectionalLight>();
+    lightNode->direction() = Vector3f {1.0f, 0.75f, 0.5f};
 
     /* Create a spatial node to hold the light. */
     const auto lightNodeSpatial = make_shared<SpatialNode>();
